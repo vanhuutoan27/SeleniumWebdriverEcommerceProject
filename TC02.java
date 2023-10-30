@@ -59,7 +59,7 @@ public class TC02 {
             // Step 7. This will take screenshot after success
             scc = (scc + 2);
             File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            String png = ("C:\\Users\\Admin\\Desktop\\SWT301\\Assignment9+10\\selenium-webdriver-java-master\\src\\test\\java\\TestCase\\" + scc + ".png");
+            String png = ("C:\\Users\\Admin\\Desktop\\SWT301\\Assignment9+10\\selenium-webdriver-java-master\\src\\test\\java\\TestCase\\Screenshot\\" + scc + ".png");
             FileUtils.copyFile(scrFile, new File(png));
 
         } catch (Exception e) {
