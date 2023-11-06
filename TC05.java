@@ -125,9 +125,9 @@ public class TC05 {
                 System.out.println("Verify wishlist share is not done.");
             }
 
-            scc = (scc + 1);
+            scc = (scc + 5);
             File srcFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            String png = "C:\\Users\\Admin\\Desktop\\SWT301\\Assignment9+10\\selenium-webdriver-java-master\\src\\test\\java\\TestCase\\Screenshot\\" + scc + ".png";
+            String png = "C:\\Users\\Admin\\Desktop\\SWT301\\selenium-webdriver-java-master\\src\\test\\java\\TestCase\\ScreenshotTC0" + scc + ".png";
             FileUtils.copyFile(srcFile, new File(png));
         } catch (Exception e) {
             e.printStackTrace();
