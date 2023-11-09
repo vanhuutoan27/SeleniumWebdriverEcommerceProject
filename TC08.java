@@ -19,8 +19,8 @@ public class TC08 {
     WebDriver driver = driverFactory.getChromeDriver();
 
     @Test
-    public void testTC08(){
-        try{
+    public void testTC08() {
+        try {
             String firstname = "Team";
             String lastname = "Work";
             String email = "marklewis27@gmail.com";
@@ -68,7 +68,7 @@ public class TC08 {
             //6. Complete Billing & Shipping Information
             CheckoutPage checkoutPage = new CheckoutPage(driver);
             checkoutPage.BillingNewAddress();
-            checkoutPage.enterBilling(firstname, lastname, company ,address, region, city, zip, country ,telephone);
+            checkoutPage.enterBilling(firstname, lastname, company, address, region, city, zip, country, telephone);
             Thread.sleep(2000);
             checkoutPage.clickDifferentAddess();
             //checkoutPage.clickBillingContinue();
@@ -81,7 +81,7 @@ public class TC08 {
             Select shippingOpts = new Select(shippingEle);
             shippingOpts.selectByIndex(shippingOpts.getOptions().size() - 1);
 
-            checkoutPage.enterShipping(firstname + "haha", lastname + "hihi", company +"Uni", address + "hehe", region, city, zip+"123", country,telephone);
+            checkoutPage.enterShipping(firstname + "haha", lastname + "hihi", company + "Uni", address + "hehe", region, city, zip + "123", country, telephone);
             //checkoutPage.clickUseBillingAddress();
             //checkoutPage.clickShippingContinue();
             // Click continue button
@@ -111,21 +111,18 @@ public class TC08 {
 
             //    7. Verify order is generated and note the order number
             List<WebElement> allLinks = driver.findElements(By.tagName("a"));
-            for(WebElement link:allLinks){
-                if(link.getText().startsWith("1000")){
+            for (WebElement link : allLinks) {
+                if (link.getText().startsWith("1000")) {
                     System.out.println("Created order Id: " + link.getText());
                 }
             }
 
-            File scrFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+            File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
 
             String png = ("C:\\Users\\Admin\\Desktop\\SWT301\\selenium-webdriver-java-master\\src\\test\\java\\TestCase\\screenshots\\TestCase08.png");
             FileUtils.copyFile(scrFile, new File(png));
 
-            //    Expected outcomes:
-            //    1) Grand Total is Changed
-            //    2) Order number is generated
-        }catch (Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
 
