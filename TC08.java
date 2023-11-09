@@ -1,238 +1,134 @@
 package TestCase;
 
-import java.io.File;
-
+import POM.CartPage;
+import POM.CheckoutPage;
+import POM.LoginPage;
+import driver.driverFactory;
 import org.apache.commons.io.FileUtils;
-import org.openqa.selenium.By;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.Select;
+import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
-import POM.checkOutPage;
-import POM.loginPage;
-import POM.registerPage;
-import driver.driverFactory;
+import java.io.File;
+import java.util.List;
+import java.util.Locale;
 
 public class TC08 {
+    WebDriver driver = driverFactory.getChromeDriver();
+
     @Test
-    public void testTC08() {
-        int scc = 0;
-        // Init web-driver session
-        WebDriver driver = driverFactory.getChromeDriver();
-        registerPage registerPage = new registerPage(driver);
-        loginPage loginPage = new loginPage(driver);
-        checkOutPage checkOutPage = new checkOutPage(driver);
-        StringBuffer verificationError = new StringBuffer();
-        // Init input value
-        // Values for LoginPage
-        String email_address = "haha@gmail.com";
-        String password = "123456";
+    public void testTC08(){
+        try{
+            String firstname = "Team";
+            String lastname = "Work";
+            String email = "marklewis27@gmail.com";
+            String password = "123456";
+            String address = "United States";
+            String country = "US";
+            String company = "FPT";
+            String region = "57";
+            String zip = "2000";
+            String city = "Texas";
+            String telephone = "0123456789";
+            String state = "Ya";
 
-        // Values for QTY
-        String qty = "10";
-
-        // Values for checkOutPage - Billing - Shipping (also include postcode above)
-        String firstName = "Van";
-        String lastName = "Huu Toan";
-        String address = "123 Cu Chi";
-        String city = "Ho Chi Minh City";
-        String telephone = "123456789";
-        String postcode = "700000";
-
-        try {
-            // Step 1. Go to http://live.techpanda.org/
+            //1. Go to http://live.techpanda.org/
             driver.get("http://live.techpanda.org/");
-
-            // Step 2. Click on My Account link
-            registerPage.clickMyAccountLink();
-            // Switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
-
-            // Step 3. Login in application using previously created credential
-            loginPage.enterEmail(email_address);
+            //2. Click on My Account link
+            LoginPage loginPage = new LoginPage(driver);
+            loginPage.clickMyAccountLink();
+            //3. Login in application using previously created credential
+            loginPage.enterEmail(email);
             loginPage.enterPassword(password);
             loginPage.clickLoginButton();
-            // Switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
+            //4. Click on 'REORDER' link , change QTY & click Update
+            //4.1 Click Reorder
+            driver.findElement(By.xpath("//tr[@class='first odd']//a[@class='link-reorder'][normalize-space()='Reorder']")).click();
+            String prevTotal, currTotal;
+            prevTotal = driver.findElement(By.cssSelector("strong span[class='price']")).getText().substring(1);
+            System.out.println("Previous Grand Total is " + prevTotal);
+            //4.2 Update Quanity
+            WebElement quantityEle = driver.findElement(By.xpath("//input[@title='Qty']"));
+            quantityEle.clear();
+            quantityEle.sendKeys("6");
+            //4.3 Click update
+            driver.findElement(By.xpath("//button[@title='Update']")).click();
 
-            // Step 4. Click on 'REORDER' link , change QTY & click Update
-            driver.findElement(
-                            By.xpath("//tr[@class='first odd']//a[@class='link-reorder'][normalize-space()='Reorder']"))
-                    .click();
+            //5. Verify Grand Total is changed
+            currTotal = driver.findElement(By.cssSelector("strong span[class='price']")).getText().substring(1);
+            System.out.println("Actual Grand Total is " + currTotal);
+            Assert.assertNotEquals(prevTotal, currTotal);
+
+            //5.1 Click proceed checkout
+            CartPage cartPage = new CartPage(driver);
+            cartPage.clickProceedToCheckout();
+
+            //6. Complete Billing & Shipping Information
+            CheckoutPage checkoutPage = new CheckoutPage(driver);
+            checkoutPage.BillingNewAddress();
+            checkoutPage.enterBilling(firstname, lastname, company ,address, region, city, zip, country ,telephone);
             Thread.sleep(2000);
-            // Switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
-            // Change QTY & click Update
-            // Take product price
-            WebElement baseProductPrice = driver.findElement(By.cssSelector("strong span[class='price']"));
-            String TextBaseProductPrice = baseProductPrice.getText();
-            WebElement qtyInput = driver.findElement(By.xpath("//input[@title='Qty']"));
-            qtyInput.clear();
-            qtyInput.sendKeys(qty);
+            checkoutPage.clickDifferentAddess();
+            //checkoutPage.clickBillingContinue();
+            driver.findElement(By.xpath("//button[@onclick='billing.save()']//span//span[contains(text(),'Continue')]")).click();
 
-            // For debug only
-            Thread.sleep(2000);
+            Thread.sleep(3000);
 
-            driver.findElement(By.cssSelector("button[title='Update']")).click();
+            //checkoutPage.ShippingNewAddress();
+            WebElement shippingEle = driver.findElement(By.xpath("//select[@id='shipping-address-select']"));
+            Select shippingOpts = new Select(shippingEle);
+            shippingOpts.selectByIndex(shippingOpts.getOptions().size() - 1);
 
-            // For debug only
-            Thread.sleep(2000);
-
-            // Step 5. Verify Grand Total is changed
-            WebElement changedProductPrice = driver.findElement(By.cssSelector("strong span[class='price']"));
-            String TextChangedProductPrice = changedProductPrice.getText();
-            System.out.println(TextChangedProductPrice);
-
-            try {
-                AssertJUnit.assertEquals(TextChangedProductPrice, TextBaseProductPrice);
-            } catch (Error e) {
-                verificationError.append(e.toString());
-            }
-
-            // Step 6. Complete Billing & Shipping Information
-            // Click "Proceed to Checkout"
-            checkOutPage.clickCheckOutButton();
-
-            // Debug
-            Thread.sleep(0);
-
-            // Switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
-
-            Thread.sleep(0);
-            Thread.sleep(2000);
-            // Enter Billing Information, and click Continue
-            // Choose new address dropdown
-            WebElement billingDropdownElement = driver
-                    .findElement(By.xpath("//select[@id='billing-address-select']"));
-            Select billingDropdownOption = new Select(billingDropdownElement);
-            billingDropdownOption.selectByVisibleText("New Address");
-            // Input values
-            checkOutPage.enterFirstName(firstName);
-            checkOutPage.enterLastName(lastName);
-            checkOutPage.enterAddress(address);
-            checkOutPage.enterCity(city);
-
-            // Choose country dropdown
-            WebElement countryDropdownElementBilling = driver
-                    .findElement(By.xpath("//select[@id='billing:country_id']"));
-            Select countrySelectOptionBilling = new Select(countryDropdownElementBilling);
-            countrySelectOptionBilling.selectByVisibleText("United States");
-            // Choose region dropdown
-            WebElement regionDropdownElementBilling = driver.findElement(By.xpath("//select[@id='billing:region_id']"));
-            Select regionSelectOptionBilling = new Select(regionDropdownElementBilling);
-            regionSelectOptionBilling.selectByVisibleText("California");
-
-            checkOutPage.enterPostcode(postcode);
-            checkOutPage.enterTelephone(telephone);
-
-            // Check"Ship to different address"
-            driver.findElement(By.xpath("//label[@for='billing:use_for_shipping_no']")).click();
-            driver.findElement(By.xpath(".//*[@id='billing-buttons-container']/button")).click();
-            Thread.sleep(2000);
-
-            // Switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
-            Thread.sleep(2000);
-
-            // Enter Shipping Information, and click Continue
-            // Choose new address dropdown
-            WebElement shippingDropdownElement = driver
-                    .findElement(By.xpath("//select[@id='shipping-address-select']"));
-            Select shippingDropdownOption = new Select(shippingDropdownElement);
-            shippingDropdownOption.selectByVisibleText("New Address");
-            // Input values
-            checkOutPage.enterShippingFirstName(firstName);
-            checkOutPage.enterShippingLastName(lastName);
-            checkOutPage.enterShippingAddress(address);
-            checkOutPage.enterShippingCity(city);
-            checkOutPage.enterShippingTelephone(telephone);
+            checkoutPage.enterShipping(firstname + "haha", lastname + "hihi", company +"Uni", address + "hehe", region, city, zip+"123", country,telephone);
+            //checkoutPage.clickUseBillingAddress();
+            //checkoutPage.clickShippingContinue();
+            // Click continue button
             driver.findElement(By.xpath("//button[@onclick='shipping.save()']//span//span[contains(text(),'Continue')]")).click();
-            // Debug
-            Thread.sleep(0);
-            // Switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
-            Thread.sleep(2000);
-            Thread.sleep(2000);
-            // In Shipping Method, Click Continue
+            Thread.sleep(3000);
+
+            String shipMethod = driver.findElement(By.xpath("//dt[normalize-space()='Flat Rate']")).getText();
+            Assert.assertEquals(shipMethod, "Flat Rate");
+
+            // Click shipping method continue
             driver.findElement(By.xpath("//button[@onclick='shippingMethod.save()']//span//span[contains(text(),'Continue')]")).click();
-            // Debug
-            Thread.sleep(0);
-            // Switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
-            Thread.sleep(2000);
+            Thread.sleep(3000);
 
-            // In Payment Information select 'Check/Money Order' radio button.
-            // Select 'Check/Money Order'
-            driver.findElement(By.xpath("//label[@for='p_method_checkmo']")).click();
-            // Debug
-            Thread.sleep(0);
-            // Click Continue
+            checkoutPage.selectCheckMoneyOrderPaymentMethod();
+
+            // Click payment continue
             driver.findElement(By.xpath("//button[@class='button']//span//span[contains(text(),'Continue')]")).click();
-            // Debug
-            Thread.sleep(0);
-            // Switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
+
+            //checkoutPage.clickPlaceOrder();
+
             Thread.sleep(2000);
 
-            // Click 'PLACE ORDER' button
-            driver.findElement(By.xpath("//button[@title='Place Order']")).click();
-            // Debug
-            Thread.sleep(0);
-            // Switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
-            Thread.sleep(2000);
+            // Click place order
+            driver.findElement(By.xpath("//span[contains(text(),'Place Order')]")).click();
 
-            // Step 7. Verify order is generated and note the order number
-            // Verify Order is generated
-            WebElement orderGeneratedMsg = driver.findElement(By.cssSelector("div[class='page-title'] h1"));
-            String expectedOrderGeneratedMsg = "YOUR ORDER HAS BEEN RECEIVED.";
-            String actualOrderGeneratedMsg = orderGeneratedMsg.getText();
-            System.out.println(actualOrderGeneratedMsg);
-            if (actualOrderGeneratedMsg.equals(expectedOrderGeneratedMsg)) {
-                System.out.println("Verify Oder is generated is done with the message " + actualOrderGeneratedMsg);
-            } else {
-                System.out.println("Verify Oder is generated is not done.");
-            }
-            // Note the order Number
-            String orderNum = driver
-                    .findElement(By.xpath("/html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/p[1]/a[1]"))
-                    .getText();
-            System.out.println("*** Your order number is:  " + orderNum);
+            Thread.sleep(3000);
 
-            // This will take screenshot after success
-            scc = (scc + 8);
-            File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            String png = ("C:\\Users\\Admin\\Desktop\\SWT301\\selenium-webdriver-java-master\\src\\test\\java\\TestCase\\ScreenshotTC0"
-                    + scc + ".png");
+            //    7. Verify order is generated and note the order number
+            List<WebElement> allLinks = driver.findElements(By.tagName("a"));
+            for(WebElement link:allLinks){
+                if(link.getText().startsWith("1000")){
+                    System.out.println("Created order Id: " + link.getText());
+                }
+            }
+
+            File scrFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+
+            String png = ("C:\\Users\\Admin\\Desktop\\SWT301\\selenium-webdriver-java-master\\src\\test\\java\\TestCase\\screenshots\\TestCase08.png");
             FileUtils.copyFile(scrFile, new File(png));
-        } catch (Exception e) {
-            e.printStackTrace();
+
+            //    Expected outcomes:
+            //    1) Grand Total is Changed
+            //    2) Order number is generated
+        }catch (Exception ex){
+            ex.printStackTrace();
         }
 
-        // Quit browser
         driver.quit();
     }
 }

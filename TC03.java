@@ -1,87 +1,76 @@
 package TestCase;
 
-import org.apache.commons.io.FileUtils;
-import org.openqa.selenium.*;
-import org.openqa.selenium.support.ui.Select;
+import driver.driverFactory;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
-import driver.driverFactory;
-
-import java.io.File;
 
 public class TC03 {
-
     @Test
-    public void testTC03() {
-        int scc = 0;
-        StringBuffer verificationErrors = new StringBuffer();
-
-        // Initiate web driver session
+    public void testTC03(){
+        //1. Init web-driver session
         WebDriver driver = driverFactory.getChromeDriver();
+        //2. Open target page
+        try{
 
-        try {
-            // Step 1. Go to http://live.techpanda.org/
+            /**
+             * Step 1: Goto http://live.techpanda.org/
+             * Click mobile menu
+             */
+            //1. Open target page
             driver.get("http://live.techpanda.org/");
 
-            // Step 2. Click on "MOBILE" menu
-            driver.findElement(By.linkText("MOBILE")).click();
+            //1.1 Click on MOBILE -> Menu
+            WebElement mobileLink = driver.findElement(new By.ByCssSelector("body > div:nth-child(1) > div:nth-child(2) > header:nth-child(2) > div:nth-child(1) > div:nth-child(4) > nav:nth-child(1) > ol:nth-child(1) > li:nth-child(1) > a:nth-child(1)"));
 
-            // Debug purpose only
+            //debug purpose only
             Thread.sleep(2000);
 
-            // Step 3. In the list of all mobiles, click on "ADD TO CART" for Sony Xperia mobile
-            WebElement addToCartButton = driver.findElement(By.xpath("//a[@title='Sony Xperia']/ancestor::li[@class='item last']//button[@title='Add to Cart']"));
-            addToCartButton.click();
+            //1.2 Click MOBILE Link
+            mobileLink.click();
 
-            // Debug purpose only
-            Thread.sleep(2000);
+            //2. Add to cart
+            WebElement sonyXPoduct = driver.findElement(new By.ByCssSelector("body > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(3) > ul:nth-child(2) > li:nth-child(2) > div:nth-child(2) > div:nth-child(4) > button:nth-child(1) > span:nth-child(1) > span:nth-child(1)"));
 
-            // Step 4. Change the "QTY" value to 1000 and click the "UPDATE" button
-            WebElement qtyInput = driver.findElement(By.xpath("//input[@title='Qty']"));
-            qtyInput.clear();
-            qtyInput.sendKeys("1000");
-            driver.findElement(By.xpath("//button[@title='Update']")).click();
+            //2.1 Click add to cart
+            sonyXPoduct.click();
 
-            // Debug purpose only
-            Thread.sleep(2000);
+            //3.Input quantity
+            WebElement quantity = driver.findElement(new By.ByCssSelector("input[title='Qty']"));
+            quantity.clear();
+            quantity.sendKeys("1000");
 
-            // Step 5. Verify the error message
-            WebElement errorMessage = driver.findElement(By.xpath("//p[@class='item-msg error']"));
-            String expectedErrorMessage = "The requested quantity for \"Sony Xperia\" is not available";
-            AssertJUnit.assertEquals(errorMessage.getText(), expectedErrorMessage);
+            //3.1 Click update btn
+            WebElement updateBtn = driver.findElement(new By.ByCssSelector("button[title='Update'] span span"));
+            updateBtn.click();
 
-            // Debug purpose only
-            Thread.sleep(2000);
+            //4. get error and verify
+            WebElement errorMsg = driver.findElement(new By.ByCssSelector(".item-msg.error"));
+            System.out.println("Error expected: " + errorMsg.getText());
+            System.out.println("Error actual: " + "The requested quantity for 'Sony Xperia' is not available.");
+            Assert.assertEquals(errorMsg.getText(),
+                    "The requested quantity for 'Sony Xperia' is not available.");
 
-            // Step 6. Click on "EMPTY CART" link
-            driver.findElement(By.xpath("//button[@title='Empty Cart']")).click();
+            //5. Click on empty cart
+            WebElement emptyCart = driver.findElement(new By.ByCssSelector("button[id='empty_cart_button'] span span"));
 
-            // Debug purpose only
-            Thread.sleep(2000);
+            //debug purpose only
+            Thread.sleep(1000);
 
-            // Step 7. Verify cart is empty
-            try {
-                WebElement emptyCartMessage = driver.findElement(By.xpath("//h1[normalize-space()='Shopping Cart is Empty']"));
-                String expectedEmptyCartMessage = "SHOPPING CART IS EMPTY";
-                Assert.assertTrue(emptyCartMessage.getText().contains(expectedEmptyCartMessage));
-                System.out.println("Cart is empty!");
-            } catch (NoSuchElementException e) {
-                System.out.println("Cart is not empty!");
-            }
+            emptyCart.click();
 
-            // Debug purpose only
-            Thread.sleep(2000);
-
-            scc = (scc + 3);
-            File srcFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            String png = "C:\\Users\\Admin\\Desktop\\SWT301\\selenium-webdriver-java-master\\src\\test\\java\\TestCase\\ScreenshotTC0" + scc + ".png";
-            FileUtils.copyFile(srcFile, new File(png));
-
-            // Step 8. Quit browser session
-            driver.quit();
-        } catch (Exception e) {
-            e.printStackTrace();
+            WebElement emptyCartMsg = driver.findElement(new By.ByCssSelector("div[class='page-title'] h1"));
+            System.out.println("Empty message expected: " + emptyCartMsg.getText());
+            System.out.println("Empty message actual: " + "SHOPPING CART IS EMPTY");
+            AssertJUnit.assertEquals(emptyCartMsg.getText(), "SHOPPING CART IS EMPTY");
+        }catch(Exception ex){
+            ex.printStackTrace();
         }
+
+        // quit driver session
+        driver.quit();
     }
 }

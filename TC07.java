@@ -1,7 +1,7 @@
 package TestCase;
 
-import java.io.File;
-
+import POM.LoginPage;
+import driver.driverFactory;
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
@@ -9,79 +9,59 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.testng.annotations.Test;
 
-import POM.loginPage;
-import POM.registerPage;
-import driver.driverFactory;
+import java.io.File;
 
 public class TC07 {
+    WebDriver driver = driverFactory.getChromeDriver();
+
     @Test
-    public void testTC07() {
-        int scc = 0;
-        //Init web-driver session
-        WebDriver driver = driverFactory.getChromeDriver();
-        registerPage registerPage = new registerPage(driver);
-        loginPage loginPage = new loginPage(driver);
+    public void testTC07(){
+        try{
+            String firstname = "Team";
+            String lastname = "Work";
+            String email = "marklewis27@gmail.com";
+            String password = "123456";
+            String address = "United States";
+            String country = "US";
+            String company = "FPT";
+            String region = "57";
+            String zip = "2000";
+            String city = "Texas";
+            String telephone = "0123456789";
+            String state = "Ya";
 
-        // Init input value
-        // Values for LoginPage
-        String email_address = "haha@gmail.com";
-        String password = "123456";
-
-        try {
-            //Step 1. Go to http://live.techpanda.org/
+            //1. Go to http://live.techpanda.org/
             driver.get("http://live.techpanda.org/");
-
-            //Step 2. Click on My Account link
-            registerPage.clickMyAccountLink();
-            // Switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
-
-            // Step 3. Login in application using previously created credential
-            loginPage.enterEmail(email_address);
+            //2. Click on My Account link
+            LoginPage loginPage = new LoginPage(driver);
+            loginPage.clickMyAccountLink();
+            //3. Login in application using previously created credential
+            loginPage.enterEmail(email);
             loginPage.enterPassword(password);
             loginPage.clickLoginButton();
-            // Switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
 
-            //Step 4. Click on 'My Orders'
-            driver.findElement(By.xpath("//a[normalize-space()='My Orders']")).click();
-            Thread.sleep(2000);
-            // switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
+            Thread.sleep(5000);
 
-            //Step 5. Click on 'View Order'
+            //4. Click on 'My Orders'
+            driver.findElement(By.linkText("MY ORDERS")).click();
+            //5. Click on 'View Order'
             driver.findElement(By.xpath("//tr[@class='first odd']//a[contains(text(),'View Order')]")).click();
-            Thread.sleep(2000);
-            // Switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
-
-            //Step 6. Click on 'Print Order' link
+            //6. Click on 'Print Order' link
             driver.findElement(By.xpath("//a[@class='link-print']")).click();
-            Thread.sleep(2000);
+
             // switching to new window
             for (String handle : driver.getWindowHandles()) {
                 driver.switchTo().window(handle);
             }
-            Thread.sleep(3000);
 
-            // This will take screenshot after success
-            scc = (scc + 7);
-            File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            String png = ("C:\\Users\\Admin\\Desktop\\SWT301\\selenium-webdriver-java-master\\src\\test\\java\\TestCase\\ScreenshotTC0" + scc + ".png");
+            File scrFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+
+            String png = ("C:\\Users\\Admin\\Desktop\\SWT301\\selenium-webdriver-java-master\\src\\test\\java\\TestCase\\screenshots\\TestCase07.png");
             FileUtils.copyFile(scrFile, new File(png));
-        } catch (Exception e) {
-            e.printStackTrace();
+        }catch(Exception ex){
+            ex.printStackTrace();
         }
 
-        // Quit browser
         driver.quit();
     }
 }

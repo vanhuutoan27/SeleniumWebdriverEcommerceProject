@@ -1,285 +1,152 @@
 package TestCase;
 
-import java.io.File;
-
+import POM.CartPage;
+import POM.CheckoutPage;
+import POM.LoginPage;
+import POM.WishlistPage;
+import driver.driverFactory;
 import org.apache.commons.io.FileUtils;
-import org.openqa.selenium.By;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.Select;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import POM.cartPage;
-import POM.checkOutPage;
-import POM.loginPage;
-import POM.registerPage;
-import driver.driverFactory;
+import java.io.File;
+import java.util.List;
 
 public class TC06 {
     @Test
     public void testTC06() {
-        int scc = 0;
-
-        // Init web-driver session
-        WebDriver driver = driverFactory.getChromeDriver();
-        registerPage registerPage = new registerPage(driver);
-        loginPage loginPage = new loginPage(driver);
-        cartPage cartPage = new cartPage(driver);
-        checkOutPage checkOutPage = new checkOutPage(driver);
-
-        // Init input value
-        // Values for LoginPage
-        String email_address = "haha@gmail.com";
+        String firstname = "Team";
+        String lastname = "Work";
+        String email = "marklewis27@gmail.com";
         String password = "123456";
+        String address = "United States";
+        String country = "US";
+        String company = "FPT";
+        String region = "57";
+        String zip = "2000";
+        String city = "Texas";
+        String telephone = "0123456789";
+        String state = "Ya";
 
-        // Values for cartPage
-        String postcode = "70000";
-
-        // Values for checkOutPage - Billing - Shipping (also include postcode above)
-        String firstName = "Van";
-        String lastName = "Huu Toan";
-        String address = "123 Cu Chi";
-        String city = "Ho Chi Minh City";
-        String telephone = "123456789";
-
+        WebDriver driver = driverFactory.getChromeDriver();
         try {
-            // Step 1. Go to http://live.techpanda.org/
+
             driver.get("http://live.techpanda.org/");
-
-            // Step 2. Click on my account link
-            registerPage.clickMyAccountLink();
-            // Switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
-
-            // Step 3. Login in application using previously created credential
-            loginPage.enterEmail(email_address);
+            LoginPage loginPage = new LoginPage(driver);
+            loginPage.clickMyAccountLink();
+            loginPage.enterEmail(email);
             loginPage.enterPassword(password);
             loginPage.clickLoginButton();
-            // Switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
-            Thread.sleep(0);
-            // Go to TV menu
-            driver.findElement(By.linkText("TV")).click();
-            // for debug only
-            Thread.sleep(0);
-            // Add product in your wish list - use product - LG LCD
-            driver.findElement(By.xpath("//li[1]//div[1]//div[3]//ul[1]//li[1]//a[1]")).click();
-            Thread.sleep(0);
 
-            // Step 4. Click on MY WISHLIST link
-            driver.findElement(By.linkText("MY WISHLIST")).click();
-            // debug
-            Thread.sleep(2000);
-            // switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
-            Thread.sleep(0);
-
-            // Step 5. In next page, Click ADD TO CART link
-            driver.findElement(By.xpath("//button[@title='Add to Cart']")).click();
-            // debug
-            Thread.sleep(2000);
-            // switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
-            Thread.sleep(0);
-
-            // Step 6. Enter general shipping country, state/province and zip for the
-            // shipping cost estimate
-            // Choose country dropdown
-            WebElement countryDropdownElement = driver.findElement(By.xpath("//select[@id='country']"));
-            Select countrySelectOption = new Select(countryDropdownElement);
-            countrySelectOption.selectByVisibleText("United States");
-            // Choose region dropdown
-            WebElement regionDropdownElement = driver.findElement(By.xpath("//select[@id='region_id']"));
-            Select regionSelectOption = new Select(regionDropdownElement);
-            regionSelectOption.selectByVisibleText("California");
-            cartPage.enterPostcodeInput(postcode);
-
-            // Step7. Click Estimate
-            driver.findElement(By.xpath(".//*[@id='shipping-zip-form']/div/button")).click();
-            // debug
-            Thread.sleep(0);
-
-            // Step 8. Verify Shipping cost generated
-            // Verify flat rate
-            WebElement flatRate = driver.findElement(By.xpath(".//*[@id='co-shipping-method-form']/dl/dt"));
-            String expectedFlatRate = "Flat Rate";
-            String actualFlatRate = flatRate.getText();
-            System.out.println(actualFlatRate);
-            if (actualFlatRate.equals(expectedFlatRate)) {
-                System.out.println("Flat Rate verified " + actualFlatRate);
-            } else {
-                System.out.println("Flat Rate not verified");
-            }
-            // Verify flat rate cost
-            WebElement flatRateCost = driver
-                    .findElement(By.xpath(".//*[@id='co-shipping-method-form']/dl/dd/ul/li/label"));
-            String expectedFlatRateCost = "Fixed - $5.00";
-            String actualFlatRateCost = flatRateCost.getText();
-            System.out.println(actualFlatRateCost);
-            if (actualFlatRateCost.equals(expectedFlatRateCost)) {
-                System.out.println("Flat Rate Cost verified " + actualFlatRateCost);
-            } else {
-                System.out.println("Flat Rate Cost not verified");
-            }
-
-            // Step 9. Select Shipping Cost, Update Total
-            driver.findElement(By.id("s_method_flatrate_flatrate")).click();
-            driver.findElement(By.xpath("//button[@title='Update Total']")).click();
-            // debug
-            Thread.sleep(0);
-
-            // Step 10. Verify shipping cost is added to total
-            WebElement shippingCostIncluded = driver
-                    .findElement(By.xpath(".//*[@id='shopping-cart-totals-table']/tbody/tr[2]/td[2]/span"));
-            String expectedShippingCostIncluded = "$5.00";
-            String actualShippingCostIncluded = shippingCostIncluded.getText();
-            System.out.println(actualShippingCostIncluded);
-            if (actualShippingCostIncluded.equals(expectedShippingCostIncluded)) {
-                System.out.println("shipping cost is added verified " + actualShippingCostIncluded);
-            } else {
-                System.out.println("shipping cost is added not verified");
-            }
-
-            // Step 11. Click "Proceed to Checkout"
-            checkOutPage.clickCheckOutButton();
-            // debug
-            Thread.sleep(0);
-            // switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
-            Thread.sleep(0);
-
-            // Step 12a. Enter Billing Information, and click Continue
-            // Choose new address dropdown
-            WebElement billingDropdownElement = driver
-                    .findElement(By.xpath("//select[@id='billing-address-select']"));
-            Select billingDropdownOption = new Select(billingDropdownElement);
-            billingDropdownOption.selectByVisibleText("New Address");
-            //input values
-            checkOutPage.enterFirstName(firstName);
-            checkOutPage.enterLastName(lastName);
-            checkOutPage.enterAddress(address);
-            checkOutPage.enterCity(city);
-
-            // Choose country dropdown
-            WebElement countryDropdownElementBilling = driver
-                    .findElement(By.xpath("//select[@id='billing:country_id']"));
-            Select countrySelectOptionBilling = new Select(countryDropdownElementBilling);
-            countrySelectOptionBilling.selectByVisibleText("United States");
-            // Choose region dropdown
-            WebElement regionDropdownElementBilling = driver.findElement(By.xpath("//select[@id='billing:region_id']"));
-            Select regionSelectOptionBilling = new Select(regionDropdownElementBilling);
-            regionSelectOptionBilling.selectByVisibleText("California");
-
-            checkOutPage.enterPostcode(postcode);
-            checkOutPage.enterTelephone(telephone);
-
-            // check"Ship to different address"
-            driver.findElement(By.xpath("//label[@for='billing:use_for_shipping_no']")).click();
-            driver.findElement(By.xpath(".//*[@id='billing-buttons-container']/button")).click();
             Thread.sleep(2000);
 
-            // switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
+            // Click on mobile link
+            driver.findElement(By.xpath("//a[normalize-space()='Mobile']")).click();
+            // Click add to wish list
+            driver.findElement(By.xpath("//li[3]//div[1]//div[3]//ul[1]//li[1]//a[1]")).click();
+            // click on Account
+            driver.findElement(By.xpath("//span[@class='label'][normalize-space()='Account']")).click();
+            // click on My Account
+            driver.findElement(By.xpath("//div[@id='header-account']//a[@title='My Account'][normalize-space()='My Account']")).click();
+
+            WebElement myWishlistLink = driver.findElement(By.linkText("MY WISHLIST"));
+            myWishlistLink.click();
+
+            WishlistPage wishlistPage = new WishlistPage(driver);
+            wishlistPage.clickAddToCart();
+
             Thread.sleep(2000);
 
-            // Step 12b. Enter Shipping Information, and click Continue
-            // Choose new address dropdown
-            WebElement shippingDropdownElement = driver
-                    .findElement(By.xpath("/html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/ol[1]/li[2]/div[2]/form[1]/ul[1]/li[1]/div[1]/select[1]"));
-            Select shippingDropdownOption = new Select(shippingDropdownElement);
-            shippingDropdownOption.selectByVisibleText("New Address");
-            //input values
-            checkOutPage.enterShippingFirstName(firstName);
-            checkOutPage.enterShippingLastName(lastName);
-            checkOutPage.enterShippingAddress(address);
-            checkOutPage.enterShippingCity(city);
-            checkOutPage.enterShippingTelephone(telephone);
-            driver.findElement(By.xpath(".//*[@id='shipping-buttons-container']/button")).click();
-            // debug
-            Thread.sleep(0);
-            // switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
-            Thread.sleep(2000);
+            CartPage cartPage = new CartPage(driver);
+            cartPage.selectCountry(country);
+            cartPage.selectRegion(region);
+            cartPage.enterZip(zip);
+            cartPage.clickEstimate();
 
-            // Step 13. In Shipping Method, Click Continue
+            //8. Verify Shipping cost generated
+            String shipType = driver.findElement(By.xpath("//dt[normalize-space()='Flat Rate']")).getText();
+            System.out.println("Actual Shipping Cost: " + shipType);
+            System.out.println("Expected Shipping Cost: " + "Flat Rate");
+            Assert.assertEquals(shipType, "Flat Rate");
+
+            //String shipCost = driver.findElement(By.cssSelector("label[for='s_method_flatrate_flatrate']")).getText();
+
+            // Select shipping type
+            driver.findElement(By.xpath("//input[@id='s_method_flatrate_flatrate']")).click();
+            // click update
+            cartPage.clickUpdateTotal();
+
+            //10. Verify shipping cost is added to total
+            String shipTotal = driver.findElement(By.cssSelector("body > div:nth-child(1) > div:nth-child(2) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(4) > div:nth-child(1) > table:nth-child(1) > tbody:nth-child(3) > tr:nth-child(2) > td:nth-child(2) > span:nth-child(1)")).getText();
+            System.out.println("Shipping total price: " + shipTotal);
+            Assert.assertTrue(!shipTotal.isEmpty());
+
+            cartPage.clickProceedToCheckout();
+
+            CheckoutPage checkoutPage = new CheckoutPage(driver);
+            checkoutPage.BillingNewAddress();
+            checkoutPage.enterBilling(firstname, lastname, company ,address, region, city, zip, country ,telephone);
+            Thread.sleep(2000);
+            checkoutPage.clickDifferentAddess();
+            //checkoutPage.clickBillingContinue();
+            driver.findElement(By.xpath("//button[@onclick='billing.save()']//span//span[contains(text(),'Continue')]")).click();
+
+            Thread.sleep(3000);
+
+            //checkoutPage.ShippingNewAddress();
+            WebElement shippingEle = driver.findElement(By.xpath("//select[@id='shipping-address-select']"));
+            Select shippingOpts = new Select(shippingEle);
+            shippingOpts.selectByIndex(shippingOpts.getOptions().size() - 1);
+
+            checkoutPage.enterShipping(firstname + "haha", lastname + "hihi", company +"Uni", address + "hehe", region, city, zip+"123", country,telephone);
+            //checkoutPage.clickUseBillingAddress();
+            //checkoutPage.clickShippingContinue();
+            // Click continue button
+            driver.findElement(By.xpath("//button[@onclick='shipping.save()']//span//span[contains(text(),'Continue')]")).click();
+            Thread.sleep(3000);
+
+            String shipMethod = driver.findElement(By.xpath("//dt[normalize-space()='Flat Rate']")).getText();
+            Assert.assertEquals(shipMethod, "Flat Rate");
+
+            //checkoutPage.clickShippingMethodContinue();
+            // Click shipping method continue
             driver.findElement(By.xpath("//button[@onclick='shippingMethod.save()']//span//span[contains(text(),'Continue')]")).click();
-            // debug
-            Thread.sleep(0);
-            // switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
-            Thread.sleep(2000);
+            Thread.sleep(3000);
 
-            // Step 14. In Payment Information select 'Check/Money Order' radio button.
-            // select 'Check/Money Order'
-            driver.findElement(By.xpath("//label[@for='p_method_checkmo']")).click();
-            // debug
-            Thread.sleep(0);
-            // Click Continue
+            checkoutPage.selectCheckMoneyOrderPaymentMethod();
+//            checkoutPage.clickPaymentContinue();
+
+            // Click payment continue
             driver.findElement(By.xpath("//button[@class='button']//span//span[contains(text(),'Continue')]")).click();
-            // debug
-            Thread.sleep(0);
-            // switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
+
+            //checkoutPage.clickPlaceOrder();
+
             Thread.sleep(2000);
 
-            // Step 15. Click 'PLACE ORDER' button
+            // Click place order
             driver.findElement(By.xpath("//span[contains(text(),'Place Order')]")).click();
-            // debug
-            Thread.sleep(0);
-            // switching to new window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
-            Thread.sleep(2000);
 
-            // 16. Verify Oder is generated. Note the order number
-            // Verify Order is generated
-            WebElement orderGeneratedMsg = driver.findElement(By.cssSelector("div[class='page-title'] h1"));
-            String expectedOrderGeneratedMsg = "YOUR ORDER HAS BEEN RECEIVED.";
-            String actualOrderGeneratedMsg = orderGeneratedMsg.getText();
-            System.out.println(actualOrderGeneratedMsg);
-            if (actualOrderGeneratedMsg.equals(expectedOrderGeneratedMsg)) {
-                System.out.println("Verify Oder is generated is done with the message " + actualOrderGeneratedMsg);
-            } else {
-                System.out.println("Verify Oder is generated is not done.");
-            }
-            // Note the order Number
-            String orderNum = driver.findElement(By.xpath("/html[1]/body[1]/div[1]/div[1]/div[2]/div[1]/div[1]/p[1]/a[1]"))
-                    .getText();
-            System.out.println("*** Your order number is:  " + orderNum);
+            Thread.sleep(3000);
 
-            // this will take screenshot after success
-            scc = (scc + 6);
-            File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            String png = ("C:\\Users\\Admin\\Desktop\\SWT301\\selenium-webdriver-java-master\\src\\test\\java\\TestCase\\ScreenshotTC0"
-                    + scc + ".png");
+            List<WebElement> allLinks = driver.findElements(By.tagName("a"));
+            for(WebElement link:allLinks){
+                if(link.getText().startsWith("1000")){
+                    System.out.println("Created order Id: " + link.getText());
+                }
+            }
+
+            File scrFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+
+            String png = ("C:\\Users\\Admin\\Desktop\\SWT301\\selenium-webdriver-java-master\\src\\test\\java\\TestCase\\screenshots\\TestCase06.png");
             FileUtils.copyFile(scrFile, new File(png));
 
-        } catch (Exception e) {
+        }catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            driver.quit();
         }
-
-        // Quit browser
-        driver.quit();
     }
 }

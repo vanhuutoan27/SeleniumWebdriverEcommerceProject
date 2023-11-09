@@ -1,98 +1,84 @@
 package TestCase;
 
-import java.io.File;
-
-import org.apache.commons.io.FileUtils;
+import driver.driverFactory;
 import org.openqa.selenium.By;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Action;
+import org.openqa.selenium.interactions.Actions;
+import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
-import driver.driverFactory;
-
 public class TC04 {
-
     @Test
-    public void testTC04() {
-        int scc = 0;
-        //Init web-driver session
+    public void testTC04(){
+        //1. Init web-driver session
         WebDriver driver = driverFactory.getChromeDriver();
-
-        try {
-            //Step 1. Go to http://live.techpanda.org/
+        try{
+            /**
+             * Step 1: Goto http://live.techpanda.org/
+             * Click mobile menu
+             */
+            //1. Open target page
             driver.get("http://live.techpanda.org/");
 
-            // Step 2. Click on �MOBILE� menu
-            driver.findElement(By.linkText("MOBILE")).click();
-            // for debug only
+            //1.1 Click on MOBILE -> Menu
+            WebElement mobileLink = driver.findElement(new By.ByCssSelector("body > div:nth-child(1) > div:nth-child(2) > header:nth-child(2) > div:nth-child(1) > div:nth-child(4) > nav:nth-child(1) > ol:nth-child(1) > li:nth-child(1) > a:nth-child(1)"));
+            mobileLink.click();
+
+            //debug purpose only
             Thread.sleep(2000);
 
-            // Step 3. In mobile products list , click on �Add To Compare� for 2 mobiles (Sony Xperia & Iphone)
-            driver.findElement(By.xpath("//li[2]//div[1]//div[3]//ul[1]//li[2]//a[1]")).click();
-            driver.findElement(By.xpath("//li[3]//div[1]//div[3]//ul[1]//li[2]//a[1]")).click();
-            //for debug only
+
+            //2.Compare mobile
+            WebElement compareELe1 = driver.findElement(By.xpath("//li[1]//div[1]//div[3]//ul[1]//li[2]//a[1]"));
+
+            compareELe1.click();
+
+            //debug purpose only
+            Thread.sleep(1000);
+
+            WebElement compareEle2 = driver.findElement(By.xpath("//li[3]//div[1]//div[3]//ul[1]//li[2]//a[1]"));
+            compareEle2.click();
+
+            //2.1 click add compare
             Thread.sleep(3000);
 
-            // Step 4. Click on �COMPARE� button. A popup window opens
-            driver.findElement(By.cssSelector("button[title='Compare']")).click();
-            //for debug only
-            Thread.sleep(2000);
+            //3.Click compare
+            WebElement compareBtn = driver.findElement(new By.ByCssSelector("button[title='Compare']"));
 
-            // Step 5. Verify the pop-up window and check that the products are reflected in it
-            //Verify the popup window
-            for (String handle : driver.getWindowHandles()) {
-                driver.switchTo().window(handle);
-            }
-            Thread.sleep(2000);
-            WebElement popupHeading = driver.findElement(By.cssSelector("div[class='page-title title-buttons'] h1"));
-            String expectedPopupHeading = "COMPARE PRODUCTS";
-            String actualPopupHeading = popupHeading.getText();
-            System.out.println(actualPopupHeading);
-            if (actualPopupHeading.equals(expectedPopupHeading)) {
-                System.out.println("Popup window opened with heading: " + actualPopupHeading);
-            } else {
-                System.out.println("Popup window heading verification failed.");
-            }
+            //debug purpose only
+            Thread.sleep(1000);
 
-            // check that the products are reflected in it
-            WebElement product1Element = driver.findElement(By.xpath("//a[normalize-space()='Sony Xperia']"));
-            String expectedProduct1 = "SONY XPERIA";
-            String actualProduct1 = product1Element.getText();
-            System.out.println(actualProduct1);
-            WebElement product2Element = driver.findElement(By.xpath("//a[normalize-space()='IPhone']"));
-            String expectedProduct2 = "IPHONE";
-            String actualProduct2 = product2Element.getText();
-            System.out.println(actualProduct2);
-            if (actualProduct1.equals(expectedProduct1) && actualProduct2.equals(expectedProduct2)) {
-                System.out.println("Popup window have correct product reflected in it: " + actualProduct1 + ", " + actualProduct2);
-            } else {
-                System.out.println("Popup window doesn't have correct product reflected in it.");
-            }
+            compareBtn.click();
 
-            // Step 6. Close the Popup Windows
-            driver.findElement(By.xpath("//button[@title='Close Window']")).click();
-
-            //for debug only
-            Thread.sleep(2000);
-
-            // Step 7. Switching to new window
+            // switching to new window
             for (String handle : driver.getWindowHandles()) {
                 driver.switchTo().window(handle);
             }
 
-            Thread.sleep(2000);
 
-            scc = (scc + 4);
-            File srcFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            String png = "C:\\Users\\Admin\\Desktop\\SWT301\\selenium-webdriver-java-master\\src\\test\\java\\TestCase\\ScreenshotTC0" + scc + ".png";
-            FileUtils.copyFile(srcFile, new File(png));
-        } catch (Exception e) {
-            e.printStackTrace();
+            //4. Get pop-up info
+            WebElement header = driver.findElement(new By.ByCssSelector("div[class='page-title title-buttons'] h1"));
+            System.out.println("Header expected: " + "COMPARE PRODUCTS");
+            System.out.println("Header actual: " + header.getText());
+            AssertJUnit.assertEquals(header.getText(), "COMPARE PRODUCTS");
+
+            //4.1 Element1 header
+            WebElement headerEle1 = driver.findElement(new By.ByCssSelector("h2[class='product-name'] a[title='IPhone']"));
+            WebElement headerEle2 = driver.findElement(new By.ByCssSelector("h2[class='product-name'] a[title='Samsung Galaxy']"));
+            System.out.println("Element 1 name : " + headerEle1.getText());
+            System.out.println("Element 2 name : " + headerEle2.getText());
+
+            Thread.sleep(3000);
+            //5. Close pop up
+            WebElement closePopupBtn = driver.findElement(new By.ByCssSelector("button[title='Close Window'] span span"));
+            closePopupBtn.click();
+        }catch(Exception ex){
+            ex.printStackTrace();
         }
-
-        // Quit browser
+        // quit driver session
         driver.quit();
     }
 }
